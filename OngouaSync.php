@@ -53,7 +53,7 @@ function OngouaSync($depot)
 
     if (count($infos) !== 2) die("Format du dépôt incorrect. Exemple: utilisateur/depot");
 
-	$branche          = "main";
+    $branche          = "main";
     $nom_depot        = $infos[1];
     $nom_dossier_temp = "$nom_depot-$branche";
     $fichier_zip      = get_archive("https://github.com/$depot/archive/refs/heads/main.zip");
