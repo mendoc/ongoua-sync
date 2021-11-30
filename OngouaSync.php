@@ -68,7 +68,7 @@ function OngouaSync($depot)
         $archive->extractTo($chemin_dossier_travail);
         $archive->close();
 
-		// Copie des fichiers extraits dans le dossier de travail
+	// Copie des fichiers extraits dans le dossier de travail
         rcopy($nom_dossier_temp, realpath("."));
         
         // Suppression du dossier temporaire
