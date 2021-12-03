@@ -1,10 +1,6 @@
 # OngouaSync
 Déployez votre site ou application web avec un simple git push.
 
-
-## Présentation
-Déployez votre application PHP avec un simple git push. 
-
 ## Fonctionnement
 Les fichiers existants sont écrasés et remplacés par ceux provenant de Github.
 
