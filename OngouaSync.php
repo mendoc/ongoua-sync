@@ -2,7 +2,7 @@
 
 /**
  * Ce script permet de synchroniser un dépôt Github et 
- * un dossier distant héberger dans un serveur supportant PHP
+ * un dossier distant héberger dans un serveur supportant PHP.
  * 
  * A chaque push sur la branche main, il récupère les fichiers sur Github et les met
  * à jour dans le dossier où il se trouve.
@@ -14,10 +14,20 @@
  *	TRAITEMENT PRINCIPAL
  * =========================================================
  */
+ 
+// Vérification de la version de PHP
+if(version_compare(PHP_VERSION, '5.6.0', '<')) {
+	die("PHP 5.6.0 ou supérieur est requis.");
+}
 
 // Récupration des en-têtes de la requête
 $headers   = getallheaders();
 $signature = $headers["X-Hub-Signature-256"];
+
+if(!isset($signature)) {
+	header('HTTP/1.0 403 Forbidden');
+	die("Vous n'êtes pas autorisé à accéder à ce script.");
+}
 
 $payload = file_get_contents("php://input");
 $hash    = "sha256=" . hash_hmac('sha256', $payload, 'OngouaSync');
@@ -37,13 +47,11 @@ $depot = $infos["repository"]["full_name"];
 // Synchronisation du dossier
 OngouaSync($depot);
 
-
 /**
  * =========================================================
  *	FONCTIONS DE TRAVAIL
  * =========================================================
  */
- 
  
 function OngouaSync($depot)
 {
@@ -53,7 +61,7 @@ function OngouaSync($depot)
 
     if (count($infos) !== 2) die("Format du dépôt incorrect. Exemple: utilisateur/depot");
 
-    $branche          = "main";
+	$branche          = "main";
     $nom_depot        = $infos[1];
     $nom_dossier_temp = "$nom_depot-$branche";
     $fichier_zip      = get_archive("https://github.com/$depot/archive/refs/heads/main.zip");
@@ -68,7 +76,7 @@ function OngouaSync($depot)
         $archive->extractTo($chemin_dossier_travail);
         $archive->close();
 
-	// Copie des fichiers extraits dans le dossier de travail
+		// Copie des fichiers extraits dans le dossier de travail
         rcopy($nom_dossier_temp, realpath("."));
         
         // Suppression du dossier temporaire
@@ -76,6 +84,9 @@ function OngouaSync($depot)
         
         // Suppression de l'archive
         unlink($fichier_zip);
+        
+        // Installation des dépendances
+        installer_deps();
         
         die("Dossier mis à jour.");
     } else {
@@ -140,4 +151,21 @@ function rcopy($src, $dst)
         foreach ($files as $file)
             if ($file != "." && $file != "..") rcopy("$src/$file", "$dst/$file");
     } else if (file_exists($src)) copy($src, $dst);
+}
+
+function installer_deps()
+{
+	if (file_exists("composer.json")) {
+		
+		$composerFilename = "composer-setup.php";
+		
+		if (!file_exists("composer.phar")) {
+			copy("https://mendoc.github.io/ongoua-sync/$composerFilename", $composerFilename);
+			require_once $composerFilename;
+		}
+		$output = shell_exec('php composer.phar update');
+		echo "Output: " . $output;
+		
+		if (file_exists($composerFilename)) unlink($composerFilename);
+	}
 }
