@@ -96,7 +96,7 @@ function process($argv)
             showWarnings($warnings);
             showSecurityWarning($disableTls);
         } else {
-        	exit(1);
+            exit(1);
         }
     } else {
     	exit(1);
