@@ -879,8 +879,8 @@ class Installer
 
         if (!$this->quiet) {
             if ($result) {
-                out(PHP_EOL."Composer (version {$version}) successfully installed to: {$this->target}", 'success');
-                out("Use it: php {$this->displayPath}", 'info');
+                out(PHP_EOL."Composer (version {$version}) successfully installed to: {$this->target}", 'success', true);
+                out("Use it: php {$this->displayPath}", 'info', true);
                 out('');
             } else {
                 out('The download failed repeatedly, aborting.', 'error');
