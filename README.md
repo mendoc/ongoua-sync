@@ -26,7 +26,7 @@ Des vidéos sont disponibles pour une prise en main rapide :
 - Un dépôt public
 
 ## A venir
-- Installations des dépendances &#9989; 
+- Installations des dépendances composer &#9989; 
 - Tests : Exécuter des tests de l’application
 - Config : 
     - Ignorer des dossiers et fichiers
