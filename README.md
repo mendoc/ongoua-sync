@@ -17,13 +17,13 @@ A chaque push, les fichiers existants du site sont écrasés et remplacés par c
 
 ## Prérequis
 - PHP 5.6.0 ou supérieur
-- Le module PHP **zip** activée
+- Le module PHP **zip** activé
 - Droits en écriture
 - Un dépôt public
 
 ## A venir
 - Installations des dépendances &#9989; 
-- Tests : Run des tests de l’appli
+- Tests : Exécuter des tests de l’application
 - Config : 
     - Ignorer des dossiers et fichiers
     - Vider le dossier avant de copier les fichiers
