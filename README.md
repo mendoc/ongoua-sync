@@ -19,6 +19,7 @@ A chaque push, les fichiers existants du site sont écrasés et remplacés par c
 - PHP 5.6.0 ou supérieur
 - Le module PHP **zip** activée
 - Droits en écriture
+- Un dépôt public
 
 ## A venir
 - Installations des dépendances &#9989; 
