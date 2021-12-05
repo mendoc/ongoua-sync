@@ -34,7 +34,7 @@ A chaque push, les fichiers existants du site sont écrasés et remplacés par c
 - [x] Récupérer le nom du dépôt provenant de la requête
 - [x] Vérifier la version de PHP
 - [x] Empêcher l’accès direct au script
-- [ ] Vérifier les droits d'écriture
-- [ ] Vérifier la prise en charge de ZipArchive
-- [ ] Vérifier si la fonction shell_exec est prise en charge
+- [x] Vérifier les droits d'écriture
+- [x] Vérifier la prise en charge de ZipArchive
+- [x] Vérifier si la fonction shell_exec est prise en charge
 - [ ] Empêcher des clients non autorisés à exécuter le script
