@@ -550,7 +550,7 @@ function out($text, $color = null, $newLine = true)
     }
 
     if ($newLine) {
-        $format .= '<br>' . PHP_EOL;
+        $format .= PHP_EOL;
     }
 
     printf($format, $text);
