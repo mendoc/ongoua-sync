@@ -12,6 +12,16 @@
 
 /**
  * =========================================================
+ * SECURITE
+ * 
+ * Définition d'une clé pour éviter que des clients non autorisés
+ * n'exécute le script
+ * =========================================================
+ */
+define('ONGOUA_SYNC_KEY', "OngouaSync");
+
+/**
+ * =========================================================
  *	TRAITEMENT PRINCIPAL
  * =========================================================
  */
@@ -38,7 +48,7 @@ if (!is_writable('.')) {
 
 // Récupration des en-têtes de la requête
 $headers   = getallheaders();
-$signature = $headers["X-Hub-Signature-256"];
+$signature = isset($headers["X-Hub-Signature-256"]) ? $headers["X-Hub-Signature-256"] : "";
 
 if (!isset($signature)) {
     header('HTTP/1.0 403 Forbidden');
@@ -46,7 +56,7 @@ if (!isset($signature)) {
 }
 
 $payload = file_get_contents("php://input");
-$hash    = "sha256=" . hash_hmac('sha256', $payload, 'OngouaSync');
+$hash    = "sha256=" . hash_hmac('sha256', $payload, ONGOUA_SYNC_KEY);
 
 // Si les données ne proviennent pas de Github on ne continue pas.
 if (!hash_equals($signature, $hash)) die("Signature incorrecte.");
