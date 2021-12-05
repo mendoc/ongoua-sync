@@ -17,7 +17,7 @@ A chaque push, les fichiers existants du site sont écrasés et remplacés par c
 
 ## Prérequis
 - PHP 5.6.0 ou supérieur
-- L’extension ZipArchive activée
+- Le module PHP **zip** activée
 - Droits en écriture
 
 ## A venir
