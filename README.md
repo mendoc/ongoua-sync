@@ -31,7 +31,7 @@ A chaque push, les fichiers existants du site sont écrasés et remplacés par c
 - Mettre à jour uniquement les fichiers modifiés
 
 ## TODO
-- [x] (03/12/2021)Récupérer le nom du dépôt provenant de la requête
+- [x] (03/12/2021) Récupérer le nom du dépôt provenant de la requête
 - [x] (03/12/2021) Vérifier la version de PHP
 - [x] (05/12/2021) Empêcher l’accès direct au script
 - [x] (05/12/2021) Vérifier les droits d'écriture
