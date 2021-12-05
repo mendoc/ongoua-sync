@@ -31,10 +31,10 @@ A chaque push, les fichiers existants du site sont écrasés et remplacés par c
 - Mettre à jour uniquement les fichiers modifiés
 
 ## TODO
-- [x] Récupérer le nom du dépôt provenant de la requête
-- [x] Vérifier la version de PHP
-- [x] Empêcher l’accès direct au script
-- [x] Vérifier les droits d'écriture
-- [x] Vérifier la prise en charge de ZipArchive
-- [x] Vérifier si la fonction shell_exec est prise en charge
-- [ ] Empêcher des clients non autorisés à exécuter le script
+- [x] (03/12/2021)Récupérer le nom du dépôt provenant de la requête
+- [x] (03/12/2021) Vérifier la version de PHP
+- [x] (05/12/2021) Empêcher l’accès direct au script
+- [x] (05/12/2021) Vérifier les droits d'écriture
+- [x] (05/12/2021) Vérifier la prise en charge de ZipArchive
+- [x] (05/12/2021) Vérifier si la fonction shell_exec est prise en charge
+- [ ] Empêcher des clients non autorisés d'exécuter le script
