@@ -2,11 +2,12 @@
 
 /**
  * Ce script permet de synchroniser un dépôt Github et 
- * un dossier distant héberger dans un serveur supportant PHP.
+ * un dossier distant héberger dans un serveur supportant PHP
  * 
  * A chaque push sur la branche main, il récupère les fichiers sur Github et les met
  * à jour dans le dossier où il se trouve.
  * 
+ * @author Dimitri ONGOUA
  */
  
 /**
@@ -17,7 +18,22 @@
  
 // Vérification de la version de PHP
 if(version_compare(PHP_VERSION, '5.6.0', '<')) {
-	die("PHP 5.6.0 ou supérieur est requis.");
+    die("PHP 5.6.0 ou supérieur est requis.");
+}
+
+// Vérification de la prise en charge de la classe ZipArchive
+if (!class_exists("ZipArchive")) {
+    die("La classe ZipArchive n'est pas supportée par votre serveur.");
+}
+
+// Vérification de la prise en charge de la fonction shell_exec
+if (!function_exists("shell_exec")) {
+	die("La fonction shell_exec n'est pas supportée par votre serveur.");
+}
+
+// Vérification des droits en écriture dans le dossier courant
+if(!is_writable('.')) {
+	die("Besoin des droits en écriture dans ce dossier pour continuer.");
 }
 
 // Récupration des en-têtes de la requête
@@ -90,7 +106,7 @@ function OngouaSync($depot)
         
         die("Dossier mis à jour.");
     } else {
-        die("Problème lors de l'extration du l'archive.");
+        die("Problème lors de l'extraction du l'archive.");
     }
 }
 
