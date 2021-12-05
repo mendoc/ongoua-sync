@@ -77,7 +77,7 @@ function OngouaSync($depot)
 
     if (count($infos) !== 2) die("Format du dépôt incorrect. Exemple: utilisateur/depot");
 
-	$branche          = "main";
+    $branche          = "main";
     $nom_depot        = $infos[1];
     $nom_dossier_temp = "$nom_depot-$branche";
     $fichier_zip      = get_archive("https://github.com/$depot/archive/refs/heads/main.zip");
@@ -86,8 +86,8 @@ function OngouaSync($depot)
     $chemin_dossier_travail = pathinfo($fichier_zip, PATHINFO_DIRNAME);
 
     $archive = new ZipArchive();
-    $ok      = $archive->open($fichier_zip);
-    if ($ok === TRUE) {
+    $res      = $archive->open($fichier_zip);
+    if ($res === TRUE) {
         // Extraction de l'archive dans le dossier de travail
         $archive->extractTo($chemin_dossier_travail);
         $archive->close();
@@ -106,7 +106,7 @@ function OngouaSync($depot)
         
         die("Dossier mis à jour.");
     } else {
-        die("Problème lors de l'extraction du l'archive.");
+        die("Problème lors de l'extraction du l'archive. Code erreur : " . $res);
     }
 }
 
