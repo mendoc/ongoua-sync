@@ -52,7 +52,7 @@ $hash    = "sha256=" . hash_hmac('sha256', $payload, 'OngouaSync');
 if (!hash_equals($signature, $hash)) die("Signature incorrecte.");
 
 // Récupération de l'évènement Github
-$evenement = $headers["X-Github-Event"];
+$evenement = $headers["X-GitHub-Event"];
 
 // Si ce n'est pas un push on ne continue pas.
 if ($evenement !== 'push') die("Evènement ($evenement) non pris en charge.");
