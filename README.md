@@ -10,6 +10,10 @@ A chaque push, les fichiers existants du site sont écrasés et remplacés par c
 - Récupérer l’URL pointant sur le script
 - Créer un webhook sur Github  avec l’URL du script
 
+## Pise en main
+Des vidéos sont disponibles pour une prise en main rapide :
+[Playlist Youtube](https://www.youtube.com/watch?v=JC2mT7BLbyg&list=PL7rafFfvik9WRt7sMNCxzJK4fJb8i7D1b)
+
 ## Avantages
 1. Déploiement rapide : bande passante de l’hébergeur utilisée
 2. Versionning du projet
