@@ -22,6 +22,15 @@ define('ONGOUA_SYNC_KEY', "OngouaSync");
 
 /**
  * =========================================================
+ * BRANCHE
+ * 
+ * Définition de la branche à surveiller
+ * =========================================================
+ */
+define('ONGOUA_BRANCH', "main");
+
+/**
+ * =========================================================
  *	TRAITEMENT PRINCIPAL
  * =========================================================
  */
@@ -87,7 +96,7 @@ function OngouaSync($depot)
 
     if (count($infos) !== 2) die("Format du dépôt incorrect. Exemple: utilisateur/depot");
 
-    $branche          = "main";
+    $branche          = ONGOUA_BRANCH;
     $nom_depot        = $infos[1];
     $nom_dossier_temp = "$nom_depot-$branche";
     $nom_fichier_zip  = __DIR__ . DIRECTORY_SEPARATOR . time() . ".zip";
