@@ -33,6 +33,17 @@ define('ONGOUA_PERSONAL_ACCESS_TOKEN', "");
 
 /**
  * =========================================================
+ * DEPOT
+ * 
+ * Définition du depot github
+ * 
+ * Definir un depot pour eviter de recevoir des push d'autres depots, 
+ * =========================================================
+ */
+define('ONGOUA_DEPOT', "");
+
+/**
+ * =========================================================
  * BRANCHE
  * 
  * Définition de la branche à surveiller
@@ -97,13 +108,13 @@ if ($evenement !== 'push') die("Evènement ($evenement) non pris en charge.");
 $infos      = json_decode($payload, TRUE);
 $branche    = $infos["repository"]["default_branch"];
 $depot      = $infos["repository"]["full_name"];
-$visibility = $infos["repository"]["visibility"];
+$visibilite = $infos["repository"]["visibility"];
 
 if (strlen(ONGOUA_BRANCH) > 0)
     if ($branche !== ONGOUA_BRANCH) die("Les modifications de cette branche ($branche) sont ignorées.");
 
 // Synchronisation du dossier
-OngouaSync($depot, $visibility, $branche);
+OngouaSync($depot, $branche, $visibilite);
 
 /**
  * =========================================================
@@ -111,22 +122,14 @@ OngouaSync($depot, $visibility, $branche);
  * =========================================================
  */
 
-function OngouaSync($depot, $visibility, $branche)
+function OngouaSync($depot, $branche, $visibilite)
 {
-    if (!strpos($depot, "/")) die("Nom du dépôt incorrect.");
-
-    $infos = explode("/", $depot);
-
-    if (count($infos) !== 2) die("Format du dépôt incorrect. Exemple: utilisateur/depot");
-
-    $nom_depot        = $infos[1];
-    $nom_dossier_temp = "$nom_depot-$branche";
     $nom_fichier_zip  = __DIR__ . DIRECTORY_SEPARATOR . time() . ".zip";
     $url_depot_prive  = "https://api.github.com/repos/$depot/zipball/$branche";
     $url_depot_public = "https://github.com/$depot/archive/refs/heads/$branche.zip";
 
     // Récupération des fichiers du dépôt
-    if ($visibility === "public")
+    if ($visibilite === "public")
         copyPublic($url_depot_public, $nom_fichier_zip);
     else
         copyPrivate($url_depot_prive, $nom_fichier_zip);
@@ -140,6 +143,9 @@ function OngouaSync($depot, $visibility, $branche)
         // Extraction de l'archive dans le dossier de travail
         $archive->extractTo($chemin_dossier_travail);
         $archive->close();
+
+        // Récupération du nom du dossier temporaire
+        $nom_dossier_temp = getDossierTemp($depot, $branche, $visibilite);
 
         // Copie des fichiers extraits dans le dossier de travail
         rcopy($nom_dossier_temp, realpath("."));
@@ -157,6 +163,26 @@ function OngouaSync($depot, $visibility, $branche)
 
     // Suppression de l'archive
     unlink($nom_fichier_zip);
+}
+
+function getDossierTemp($depot, $branche, $visibilite)
+{
+    if (!strpos($depot, "/")) die("Nom du dépôt incorrect.");
+
+    $infos = explode("/", $depot);
+
+    if (count($infos) !== 2) die("Format du dépôt incorrect. Exemple: utilisateur/depot");
+
+    $nom_depot = $infos[1];
+
+    if ($visibilite === "public") {
+        return "$nom_depot-$branche";
+    } else {
+        $liste_depot_dossiers = glob(str_replace("/", "-", $depot) . "-*");
+        if (count($liste_depot_dossiers) > 0) {
+            return $liste_depot_dossiers[0];
+        }
+    }
 }
 
 function rrmdir($dir)
