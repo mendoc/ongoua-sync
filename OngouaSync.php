@@ -1,12 +1,16 @@
 <?php
 
 /**
- * Ce script permet de synchroniser un dépôt Github et 
+ * Ce script permet de synchroniser un dépôt Github et
  * un dossier distant héberger dans un serveur supportant PHP
- * 
- * A chaque push sur une branche, il récupère les fichiers sur Github et les met
- * à jour dans le dossier où il se trouve.
- * 
+ *
+ * A chaque push sur la branche surveillée, il récupère les fichiers sur Github
+ * et les met à jour dans le dossier où il se trouve.
+ *
+ * A chaque création ou mise à jour d'une pull request, il récupère les fichiers
+ * de la branche source et les dépose dans un sous-dossier portant le nom de
+ * la branche (les "/" sont remplacés par "-").
+ *
  * @author Dimitri ONGOUA
  */
 
@@ -101,20 +105,38 @@ if (!hash_equals($signature, $hash)) die("Signature incorrecte.");
 // Récupération de l'évènement Github
 $evenement = isset($headers["X-GitHub-Event"]) ? $headers["X-GitHub-Event"] : $headers["X-Github-Event"];
 
-// Si ce n'est pas un push on ne continue pas.
-if ($evenement !== 'push') die("Evènement ($evenement) non pris en charge.");
+// Si ce n'est pas un push ou une pull_request on ne continue pas.
+if ($evenement !== 'push' && $evenement !== 'pull_request')
+    die("Evènement ($evenement) non pris en charge.");
 
-// Si une branche a ete precisee pour surveillance
 $infos      = json_decode($payload, TRUE);
-$branche    = $infos["repository"]["default_branch"];
 $depot      = $infos["repository"]["full_name"];
 $visibilite = $infos["repository"]["visibility"];
 
-if (strlen(ONGOUA_BRANCH) > 0)
-    if ($branche !== ONGOUA_BRANCH) die("Les modifications de cette branche ($branche) sont ignorées.");
+if ($evenement === 'push') {
 
-// Synchronisation du dossier
-OngouaSync($depot, $branche, $visibilite);
+    // Comportement existant : déploiement à la racine
+    $branche = $infos["repository"]["default_branch"];
+
+    if (strlen(ONGOUA_BRANCH) > 0)
+        if ($branche !== ONGOUA_BRANCH) die("Les modifications de cette branche ($branche) sont ignorées.");
+
+    OngouaSync($depot, $branche, $visibilite);
+
+} else {
+
+    // Gestion des pull requests : opened (création) et synchronize (nouveau push sur la branche)
+    $action = $infos["action"];
+
+    if ($action !== 'opened' && $action !== 'synchronize')
+        die("Action PR ($action) non prise en charge.");
+
+    $branche_pr  = $infos["pull_request"]["head"]["ref"];
+    $nom_dossier = str_replace("/", "-", $branche_pr);
+
+    OngouaSync($depot, $branche_pr, $visibilite, $nom_dossier);
+
+}
 
 /**
  * =========================================================
@@ -122,7 +144,7 @@ OngouaSync($depot, $branche, $visibilite);
  * =========================================================
  */
 
-function OngouaSync($depot, $branche, $visibilite)
+function OngouaSync($depot, $branche, $visibilite, $sous_dossier = null)
 {
     $nom_fichier_zip  = __DIR__ . DIRECTORY_SEPARATOR . time() . ".zip";
     $url_depot_prive  = "https://api.github.com/repos/$depot/zipball/$branche";
@@ -147,8 +169,13 @@ function OngouaSync($depot, $branche, $visibilite)
         // Récupération du nom du dossier temporaire
         $nom_dossier_temp = getDossierTemp($depot, $branche, $visibilite);
 
-        // Copie des fichiers extraits dans le dossier de travail
-        rcopy($nom_dossier_temp, realpath("."));
+        // Détermination du dossier de destination
+        $destination = is_null($sous_dossier)
+            ? realpath(".")
+            : realpath(".") . DIRECTORY_SEPARATOR . $sous_dossier;
+
+        // Copie des fichiers extraits dans le dossier de destination
+        rcopy($nom_dossier_temp, $destination);
 
         // Suppression du dossier temporaire
         rrmdir($nom_dossier_temp);
@@ -175,8 +202,11 @@ function getDossierTemp($depot, $branche, $visibilite)
 
     $nom_depot = $infos[1];
 
+    // GitHub remplace les "/" par "-" dans le nom du dossier extrait
+    $branche_sanitized = str_replace("/", "-", $branche);
+
     if ($visibilite === "public") {
-        return "$nom_depot-$branche";
+        return "$nom_depot-$branche_sanitized";
     } else {
         $liste_depot_dossiers = glob(str_replace("/", "-", $depot) . "-*");
         if (count($liste_depot_dossiers) > 0) {
