@@ -49,17 +49,31 @@ define('ONGOUA_DEPOT', "");
 /**
  * =========================================================
  * BRANCHE
- * 
+ *
  * Définition de la branche à surveiller
  * Exemples :
  * define('ONGOUA_BRANCH', "main");
  * define('ONGOUA_BRANCH', "master");
- * 
- * Si auncune branche n'est precisee, 
+ *
+ * Si auncune branche n'est precisee,
  * la branche par defaut du depot sera consideree
  * =========================================================
  */
 define('ONGOUA_BRANCH', "main");
+
+/**
+ * =========================================================
+ * SECURITE : Suppression de dossier lors de la suppression d'une branche
+ *
+ * Lorsqu'une branche est supprimée sur Github, le sous-dossier
+ * correspondant dans le projet de destination est également supprimé,
+ * même s'il n'est pas vide.
+ *
+ * Par mesure de sécurité, cette fonctionnalité est désactivée par défaut.
+ * Passez la valeur à true pour l'activer.
+ * =========================================================
+ */
+define('SYNC_DELETE_BRANCH', false);
 
 /**
  * =========================================================
@@ -105,8 +119,8 @@ if (!hash_equals($signature, $hash)) die("Signature incorrecte.");
 // Récupération de l'évènement Github
 $evenement = isset($headers["X-GitHub-Event"]) ? $headers["X-GitHub-Event"] : $headers["X-Github-Event"];
 
-// Si ce n'est pas un push ou une pull_request on ne continue pas.
-if ($evenement !== 'push' && $evenement !== 'pull_request')
+// Si ce n'est pas un push, une pull_request ou un delete on ne continue pas.
+if ($evenement !== 'push' && $evenement !== 'pull_request' && $evenement !== 'delete')
     die("Evènement ($evenement) non pris en charge.");
 
 $infos      = json_decode($payload, TRUE);
@@ -128,6 +142,28 @@ if ($evenement === 'push') {
 
     OngouaSync($depot, $branche, $visibilite);
     notifierTelegram();
+
+} else if ($evenement === 'delete') {
+
+    // Suppression du sous-dossier correspondant à la branche supprimée
+    $ref_type = $infos["ref_type"];
+    $branche  = $infos["ref"];
+
+    if ($ref_type !== 'branch')
+        die("Suppression de ($ref_type) non prise en charge.");
+
+    if (!SYNC_DELETE_BRANCH)
+        die("La suppression de dossier est désactivée (SYNC_DELETE_BRANCH = false).");
+
+    $nom_dossier    = str_replace("/", "-", $branche);
+    $chemin_dossier = realpath(".") . DIRECTORY_SEPARATOR . $nom_dossier;
+
+    if (is_dir($chemin_dossier)) {
+        rrmdir($chemin_dossier);
+        echo "Dossier $nom_dossier supprimé.";
+    } else {
+        echo "Le dossier $nom_dossier n'existe pas.";
+    }
 
 } else {
 
