@@ -59,7 +59,7 @@ define('ONGOUA_DEPOT', "");
  * la branche par defaut du depot sera consideree
  * =========================================================
  */
-define('ONGOUA_BRANCH', "");
+define('ONGOUA_BRANCH', "main");
 
 /**
  * =========================================================
@@ -115,11 +115,16 @@ $visibilite = $infos["repository"]["visibility"];
 
 if ($evenement === 'push') {
 
-    // Comportement existant : déploiement à la racine
-    $branche = $infos["repository"]["default_branch"];
+    // Déploiement à la racine
+    $branche = $infos["ref"];
+    $branche_def = $infos["repository"]["default_branch"];
+    $branche = str_replace("refs/heads/", "", $branche);
 
-    if (strlen(ONGOUA_BRANCH) > 0)
-        if ($branche !== ONGOUA_BRANCH) die("Les modifications de cette branche ($branche) sont ignorées.");
+    if (strlen(ONGOUA_BRANCH) > 0 && $branche !== ONGOUA_BRANCH) {
+        die("Les modifications de cette branche ($branche) sont ignorées.");
+    } else {
+         $branche = $branche_def;
+    }
 
     OngouaSync($depot, $branche, $visibilite);
     notifierTelegram();
