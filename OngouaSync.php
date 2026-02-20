@@ -122,6 +122,7 @@ if ($evenement === 'push') {
         if ($branche !== ONGOUA_BRANCH) die("Les modifications de cette branche ($branche) sont ignorées.");
 
     OngouaSync($depot, $branche, $visibilite);
+    notifierTelegram();
 
 } else {
 
@@ -135,6 +136,7 @@ if ($evenement === 'push') {
     $nom_dossier = str_replace("/", "-", $branche_pr);
 
     OngouaSync($depot, $branche_pr, $visibilite, $nom_dossier);
+    notifierTelegram($nom_dossier);
 
 }
 
@@ -297,4 +299,47 @@ function installer_deps()
 
         if (file_exists($composerFilename)) unlink($composerFilename);
     }
+}
+
+function chargerEnv()
+{
+    $env         = [];
+    $fichier_env = __DIR__ . DIRECTORY_SEPARATOR . '.env';
+
+    if (!file_exists($fichier_env)) return $env;
+
+    $lignes = file($fichier_env, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lignes as $ligne) {
+        if (strpos(trim($ligne), '#') === 0) continue;
+
+        $parties = explode('=', $ligne, 2);
+        if (count($parties) === 2) {
+            $env[trim($parties[0])] = trim($parties[1]);
+        }
+    }
+
+    return $env;
+}
+
+function notifierTelegram($suffixe = '')
+{
+    $env       = chargerEnv();
+    $url_app   = isset($env['URL']) ? trim($env['URL']) : '';
+    $bot_token = isset($env['TELEGRAM_BOT_TOKEN']) ? trim($env['TELEGRAM_BOT_TOKEN']) : '';
+    $chat_id   = isset($env['TELEGRAM_CHAT_ID']) ? trim($env['TELEGRAM_CHAT_ID']) : '';
+
+    if (empty($url_app) || empty($bot_token) || empty($chat_id)) return;
+
+    $message = empty($suffixe)
+        ? $url_app
+        : rtrim($url_app, '/') . '/' . $suffixe;
+
+    $api_url = "https://api.telegram.org/bot{$bot_token}/sendMessage"
+        . "?chat_id={$chat_id}&parse_mode=Markdown&text=" . urlencode($message);
+
+    $ch = curl_init($api_url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_exec($ch);
+    curl_close($ch);
 }
